@@ -1,0 +1,554 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Quick Survey Form</title>
+  <style>
+    :root {
+      --bg: #f1f3f4;
+      --card: #ffffff;
+      --text: #202124;
+      --muted: #5f6368;
+      --line: #dadce0;
+      --primary: #1a73e8;
+      --good: #1e8e3e;
+      --warn: #b06000;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: Arial, Helvetica, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      transition: background 1s ease, color 1s ease;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+    .container {
+      max-width: 760px;
+      margin: 24px auto 40px;
+      padding: 0 14px;
+      position: relative;
+      z-index: 2;
+    }
+    .header {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-top: 10px solid #673ab7;
+      border-radius: 8px;
+      padding: 18px;
+      margin-bottom: 14px;
+    }
+    h1 { margin: 0 0 8px; font-size: 1.45rem; font-weight: 600; }
+    .desc { margin: 0; color: var(--muted); font-size: 0.95rem; }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 18px;
+      margin-bottom: 12px;
+    }
+
+    .q-title { font-size: 1.05rem; margin: 0 0 12px; }
+    .options { display: grid; gap: 10px; }
+    button, input {
+      font: inherit;
+    }
+    .option-btn {
+      width: 100%;
+      text-align: left;
+      border: 1px solid var(--line);
+      background: #fff;
+      border-radius: 6px;
+      padding: 10px 12px;
+      cursor: pointer;
+    }
+    .option-btn:hover { border-color: #b7c7e6; }
+
+    .progress {
+      height: 8px;
+      background: #e8eaed;
+      border-radius: 999px;
+      overflow: hidden;
+      margin-top: 10px;
+    }
+    .progress > div {
+      height: 100%;
+      width: 0%;
+      background: var(--primary);
+      transition: width .35s ease;
+    }
+    .meta {
+      font-size: 0.9rem;
+      color: var(--muted);
+      margin-top: 8px;
+    }
+
+    .hidden { display: none !important; }
+
+    #musicBtn {
+      position: fixed;
+      top: 10px;
+      right: 10px;
+      border: 1px solid var(--line);
+      background: #fff;
+      color: #1f1f1f;
+      border-radius: 999px;
+      padding: 8px 12px;
+      cursor: pointer;
+      z-index: 10;
+    }
+
+    .hearts {
+      pointer-events: none;
+      position: fixed;
+      inset: 0;
+      overflow: hidden;
+      z-index: 1;
+      opacity: 0;
+      transition: opacity 1s ease;
+    }
+    .romance .hearts { opacity: 1; }
+
+    .heart {
+      position: absolute;
+      bottom: -20px;
+      animation: rise linear forwards;
+      color: #ff5ea5;
+      opacity: 0.8;
+      filter: drop-shadow(0 0 7px rgba(255, 94, 165, .45));
+    }
+
+    @keyframes rise {
+      0% { transform: translateY(0) scale(.8); opacity: 0; }
+      10% { opacity: .85; }
+      100% { transform: translateY(-105vh) scale(1.2); opacity: 0; }
+    }
+
+    .sudoku {
+      display: grid;
+      grid-template-columns: repeat(4, 56px);
+      gap: 8px;
+      justify-content: center;
+      margin: 12px 0;
+    }
+    .sudoku input {
+      width: 56px;
+      height: 56px;
+      text-align: center;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      font-size: 1.2rem;
+      font-weight: 700;
+    }
+
+    .center { text-align: center; }
+    .primary {
+      border: none;
+      background: #1a73e8;
+      color: white;
+      border-radius: 6px;
+      padding: 10px 14px;
+      cursor: pointer;
+      font-weight: 600;
+    }
+
+    #loveTarget {
+      position: relative;
+      margin: 14px auto;
+      width: 80px;
+      height: 80px;
+      border-radius: 999px;
+      border: 0;
+      background: linear-gradient(145deg, #ffdce9, #ff8ec0);
+      font-size: 2rem;
+      cursor: pointer;
+    }
+
+    .key-icon {
+      font-size: 3rem;
+      display: inline-block;
+      animation: pulse 1s infinite;
+      cursor: pointer;
+    }
+    @keyframes pulse {
+      0%,100% { transform: scale(1); }
+      50% { transform: scale(1.12); }
+    }
+
+    .chest {
+      width: 180px;
+      height: 130px;
+      margin: 16px auto;
+      border-radius: 12px;
+      background: linear-gradient(180deg, #8d5b2e, #6d4120);
+      border: 4px solid #4c2d14;
+      position: relative;
+      cursor: pointer;
+      box-shadow: 0 12px 24px rgba(0,0,0,.25);
+    }
+    .chest::before {
+      content: "";
+      position: absolute;
+      top: 52px;
+      left: 0;
+      right: 0;
+      height: 10px;
+      background: #4c2d14;
+    }
+    .chest::after {
+      content: "🔒";
+      position: absolute;
+      left: 50%;
+      top: 46px;
+      transform: translateX(-50%);
+      font-size: 1.2rem;
+    }
+
+    .curtain-wrap {
+      min-height: 58vh;
+      border-radius: 14px;
+      overflow: hidden;
+      position: relative;
+      background: radial-gradient(circle at center, #3f214b 0%, #190f2a 70%);
+      border: 1px solid #58356c;
+      margin-top: 14px;
+    }
+    .curtain {
+      position: absolute;
+      top: 0;
+      width: 50%;
+      height: 100%;
+      background: repeating-linear-gradient(90deg, #8a003c, #a00248 24px, #700034 44px);
+      transition: transform 2.4s cubic-bezier(.2,.8,.2,1);
+      z-index: 4;
+    }
+    .curtain.left { left: 0; }
+    .curtain.right { right: 0; }
+    .curtain-wrap.open .left { transform: translateX(-104%); }
+    .curtain-wrap.open .right { transform: translateX(104%); }
+
+    .message {
+      position: relative;
+      z-index: 2;
+      padding: 28px 14px;
+      color: #fff7fb;
+      text-align: center;
+    }
+    .typing {
+      margin: 0 auto;
+      max-width: 680px;
+      white-space: pre-wrap;
+      line-height: 1.55;
+      text-align: left;
+      background: rgba(255,255,255,.12);
+      border: 1px solid rgba(255,255,255,.28);
+      border-radius: 10px;
+      padding: 14px;
+      min-height: 190px;
+    }
+
+    .romance {
+      background: radial-gradient(circle at top, #3d2a57 0%, #1b162c 60%, #0b0b14 100%);
+      color: #fff6fa;
+    }
+    .romance .header,
+    .romance .card {
+      background: rgba(255,255,255,.12);
+      border-color: rgba(255,255,255,.35);
+      backdrop-filter: blur(6px);
+    }
+    .romance .desc,
+    .romance .meta { color: #ffe8f3; }
+
+    @media (max-width: 640px) {
+      .container { margin-top: 12px; }
+      .sudoku { grid-template-columns: repeat(4, 50px); }
+      .sudoku input { width: 50px; height: 50px; }
+      .typing { font-size: .95rem; }
+    }
+  </style>
+</head>
+<body>
+  <div class="hearts" id="hearts"></div>
+  <button id="musicBtn" class="hidden">🎵 Play music</button>
+  <audio id="bgMusic" src="romantic.mp3" preload="auto" loop></audio>
+
+  <main class="container">
+    <section class="header">
+      <h1 id="mainTitle">General Information Survey</h1>
+      <p class="desc" id="mainDesc">Please answer all questions honestly. This should take less than 2 minutes.</p>
+      <div class="progress"><div id="progressBar"></div></div>
+      <p class="meta" id="progressText">Question 1 of 10</p>
+    </section>
+
+    <section class="card" id="surveyCard">
+      <p class="q-title" id="questionText"></p>
+      <div class="options" id="optionBox"></div>
+    </section>
+
+    <section class="card hidden" id="sudokuCard">
+      <h2>Verification Step: Logic Puzzle</h2>
+      <p>Enter values 1-4 so each row and column includes each number once.</p>
+      <div class="sudoku" id="sudokuGrid"></div>
+      <p class="meta center" id="sudokuStatus"></p>
+      <div class="center"><button class="primary" id="checkSudoku">Submit puzzle</button></div>
+    </section>
+
+    <section class="card hidden" id="gameCard">
+      <h2>Mini Reflex Test</h2>
+      <p class="center">Tap the moving button 10 times.</p>
+      <button id="loveTarget">💖</button>
+      <p class="meta center" id="gameStatus">Hits: 0 / 10</p>
+    </section>
+
+    <section class="card hidden" id="keyCard">
+      <h2>Item Found</h2>
+      <p class="center">You found a key. Click it to pick it up.</p>
+      <p class="center"><span id="keyIcon" class="key-icon">🗝️</span></p>
+      <p class="meta center" id="keyStatus"></p>
+    </section>
+
+    <section class="card hidden" id="chestCard">
+      <h2>Locked Chest</h2>
+      <p class="center">Use your key to unlock the chest.</p>
+      <div class="chest" id="chest"></div>
+      <p class="meta center" id="chestStatus"></p>
+      <div class="center"><button class="primary hidden" id="revealBtn">Open the chest</button></div>
+      <div class="curtain-wrap hidden" id="curtainWrap">
+        <div class="curtain left"></div>
+        <div class="curtain right"></div>
+        <div class="message">
+          <h3>For You bebegurl 💌</h3>
+          <div class="typing" id="typing"></div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const surveyQuestions = [
+      { q: 'Age range?', opts: ['Under 18', '18-24', '25-34', '35+'] },
+      { q: 'Sex?', opts: ['Female', 'Male', 'Prefer not to say'] },
+      { q: 'Current relationship status?', opts: ['Single', 'Taken', 'It\'s complicated'] },
+      { q: 'Daily screen time?', opts: ['0-2 hours', '3-5 hours', '6+ hours'] },
+      { q: 'Preferred contact method?', opts: ['Text', 'Call', 'In person'] },
+      { q: 'Ideal date activity?', opts: ['Coffee chat ☕', 'Sunset walk 🌇', 'Fancy dinner ✨'] },
+      { q: 'Pick a color mood?', opts: ['Blue', 'Purple', 'Pink'] },
+      { q: 'Choose a vibe?', opts: ['Calm', 'Playful', 'Romantic'] },
+      { q: 'Best surprise?', opts: ['Snack', 'Small gift', 'Handwritten note'] },
+      { q: 'Final choice?', opts: ['Keep it simple', 'Make it special', 'Make it unforgettable'] }
+    ];
+
+    const longMessage = `To the best person in my world,
+
+HIII ATEE 💕💕 Happy Valentines, happy happy Valentines!!! I just want you to know how much I love you, how much I care for you, and how much you really mean to me. Maybe this is not perfect, maybe it’s simple, but I hope these words are enough to make you feel seen, loved, and special because you truly deserve that and so much more.
+
+Ate, I know lately I’ve been busy, so busy that sometimes I can’t give you the time and attention you want and deserve. I know you want my presence, my time, my lambing, and my little moments with you, and I’m really sorry if sometimes it feels like I’m not there enough. But please always remember, even when I’m tired, stressed, or busy, you are always in my heart and in my mind every single day.
+
+But today is about YOU ate 💖 I wanna thank you for always being there for me, for trusting me, for staying even when things are hard, even when days are heavy and moods are everywhere. Thank you for being patient with me, for understanding me, for not giving up on me, and for loving me in your own beautiful way. You don’t know how much comfort and happiness you give me just by being you.
+
+I may not always know how to fix your mood swings, I may not always say the perfect words, but one thing I promis I will always be here for you. Your friend, your comfort, your safe place, your favorite person, your kakampi, your lambing partner, and hopefully the love of your life forever 💞💞💞
+
+Ate I love you so much, more than words can explain, more than you can imagine. Please always take care of yourself, eat well, drink water, rest well, and don’t forget how special and important you are to me. You deserve all the love, care, hugs, kisses, and happiness in the world especially today and every day.
+
+Happy Valentines again ate 💘💘 I’m always here, always yours, always loving you. Mwa mwa mwa 😘😘😘💖💖💖
+
+Happy Valentine's Day.
+You are deeply, truly special to me. 💖`;
+
+    const sudokuPuzzle = [
+      [1,0,3,4],
+      [0,4,1,0],
+      [2,0,4,3],
+      [4,3,0,1]
+    ];
+    const sudokuSolution = [
+      [1,2,3,4],
+      [3,4,1,2],
+      [2,1,4,3],
+      [4,3,2,1]
+    ];
+
+    const questionText = document.getElementById('questionText');
+    const optionBox = document.getElementById('optionBox');
+    const progressBar = document.getElementById('progressBar');
+    const progressText = document.getElementById('progressText');
+    const surveyCard = document.getElementById('surveyCard');
+    const sudokuCard = document.getElementById('sudokuCard');
+    const gameCard = document.getElementById('gameCard');
+    const keyCard = document.getElementById('keyCard');
+    const chestCard = document.getElementById('chestCard');
+    const musicBtn = document.getElementById('musicBtn');
+    const bgMusic = document.getElementById('bgMusic');
+
+    let i = 0;
+    let hits = 0;
+    let hasKey = false;
+    let romanceMode = false;
+
+    function setProgress() {
+      progressBar.style.width = ((i / surveyQuestions.length) * 100) + '%';
+      progressText.textContent = i < surveyQuestions.length
+        ? `Question ${i + 1} of ${surveyQuestions.length}`
+        : 'Survey complete';
+    }
+
+    function tryPlayMusic() {
+      bgMusic.play().then(() => {
+        musicBtn.textContent = '🎵 Music playing';
+      }).catch(() => {
+        musicBtn.textContent = '🎵 Tap to play music';
+      });
+    }
+
+    musicBtn.addEventListener('click', () => {
+      if (bgMusic.paused) {
+        tryPlayMusic();
+      } else {
+        bgMusic.pause();
+        musicBtn.textContent = '🎵 Resume music';
+      }
+    });
+
+    function activateRomanceMode() {
+      if (romanceMode) return;
+      romanceMode = true;
+      document.body.classList.add('romance');
+      document.getElementById('mainTitle').textContent = 'WHAT IS DIS TESTT????';
+      document.getElementById('mainDesc').textContent = 'You reached the second phase. Things are now getting... romantic.';
+      musicBtn.classList.remove('hidden');
+      tryPlayMusic();
+    }
+
+    function renderSurvey() {
+      setProgress();
+      const q = surveyQuestions[i];
+      if (!q) {
+        surveyCard.classList.add('hidden');
+        sudokuCard.classList.remove('hidden');
+        return;
+      }
+      if (i === 5) activateRomanceMode();
+
+      questionText.textContent = q.q;
+      optionBox.innerHTML = '';
+      q.opts.forEach(o => {
+        const btn = document.createElement('button');
+        btn.className = 'option-btn';
+        btn.textContent = o;
+        btn.onclick = () => {
+          i++;
+          renderSurvey();
+        };
+        optionBox.appendChild(btn);
+      });
+    }
+
+    function buildSudoku() {
+      const grid = document.getElementById('sudokuGrid');
+      grid.innerHTML = '';
+      for (let r = 0; r < 4; r++) {
+        for (let c = 0; c < 4; c++) {
+          const inp = document.createElement('input');
+          inp.dataset.r = r;
+          inp.dataset.c = c;
+          inp.maxLength = 1;
+          inp.inputMode = 'numeric';
+          if (sudokuPuzzle[r][c] !== 0) {
+            inp.value = sudokuPuzzle[r][c];
+            inp.disabled = true;
+          } else {
+            inp.placeholder = '•';
+            inp.oninput = () => inp.value = inp.value.replace(/[^1-4]/g, '');
+          }
+          grid.appendChild(inp);
+        }
+      }
+    }
+
+    document.getElementById('checkSudoku').addEventListener('click', () => {
+      const status = document.getElementById('sudokuStatus');
+      const cells = [...document.querySelectorAll('#sudokuGrid input')];
+      for (const c of cells) {
+        const r = Number(c.dataset.r);
+        const col = Number(c.dataset.c);
+        if (Number(c.value) !== sudokuSolution[r][col]) {
+          status.textContent = 'Incorrect puzzle input. Please retry.';
+          status.style.color = 'var(--warn)';
+          return;
+        }
+      }
+      status.textContent = 'Puzzle validated. Next step unlocked.';
+      status.style.color = 'var(--good)';
+      sudokuCard.classList.add('hidden');
+      gameCard.classList.remove('hidden');
+    });
+
+    const loveTarget = document.getElementById('loveTarget');
+    loveTarget.addEventListener('click', () => {
+      hits++;
+      document.getElementById('gameStatus').textContent = `Hits: ${hits} / 10`;
+      loveTarget.style.left = (Math.random() * 220 - 110) + 'px';
+      loveTarget.style.top = (Math.random() * 90 - 45) + 'px';
+      if (hits >= 10) {
+        gameCard.classList.add('hidden');
+        keyCard.classList.remove('hidden');
+      }
+    });
+
+    document.getElementById('keyIcon').addEventListener('click', () => {
+      hasKey = true;
+      document.getElementById('keyStatus').textContent = 'Key collected. Chest access enabled.';
+      keyCard.classList.add('hidden');
+      chestCard.classList.remove('hidden');
+    });
+
+    document.getElementById('chest').addEventListener('click', () => {
+      const status = document.getElementById('chestStatus');
+      if (!hasKey) {
+        status.textContent = 'Chest locked. Key required.';
+        status.style.color = 'var(--warn)';
+        return;
+      }
+      status.textContent = 'Chest unlocked. Treasure available.';
+      status.style.color = 'var(--good)';
+      document.getElementById('revealBtn').classList.remove('hidden');
+    });
+
+    function typeMessage(text, idx = 0) {
+      const box = document.getElementById('typing');
+      if (idx === 0) box.textContent = '';
+      if (idx < text.length) {
+        box.textContent += text[idx];
+        setTimeout(() => typeMessage(text, idx + 1), 24);
+      }
+    }
+
+    document.getElementById('revealBtn').addEventListener('click', () => {
+      const wrap = document.getElementById('curtainWrap');
+      wrap.classList.remove('hidden');
+      setTimeout(() => wrap.classList.add('open'), 60);
+      setTimeout(() => typeMessage(longMessage), 860);
+    });
+
+    setInterval(() => {
+      if (!romanceMode) return;
+      const hearts = document.getElementById('hearts');
+      const h = document.createElement('div');
+      h.className = 'heart';
+      h.textContent = Math.random() > 0.5 ? '💖' : '💘';
+      h.style.left = Math.random() * 100 + 'vw';
+      h.style.fontSize = (16 + Math.random() * 20) + 'px';
+      h.style.animationDuration = (5 + Math.random() * 5) + 's';
+      hearts.appendChild(h);
+      setTimeout(() => h.remove(), 10500);
+    }, 350);
+
+    buildSudoku();
+    renderSurvey();
+  </script>
+</body>
+</html>
